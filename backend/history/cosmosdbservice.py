@@ -29,7 +29,25 @@ class CosmosConversationClient():
         except exceptions.CosmosResourceNotFoundError:
             raise ValueError("Invalid CosmosDB container name") 
         
-
+    # async def add_user_feedback(self, message_id, user_id, user_feedback):
+    #     try:
+    #         message = await self.container_client.read_item(item=message_id, partition_key=user_id)
+    #         if message:
+    #             if 'UserFeedback' not in message:
+    #                 message['UserFeedback'] = []
+    #             message['UserFeedback'].append({
+    #                 'feedback': user_feedback,
+    #                 'timestamp': datetime.utcnow().isoformat()
+    #             })
+    #             message['updatedAt'] = datetime.utcnow().isoformat()
+    #             resp = await self.container_client.upsert_item(message)
+    #             return resp
+    #         else:
+    #             return False
+    #     except exceptions.CosmosHttpResponseError as e:
+    #         print(f"An error occurred: {e.message}")
+    #         return False
+        
     async def ensure(self):
         if not self.cosmosdb_client or not self.database_client or not self.container_client:
             return False, "CosmosDB client not initialized correctly"
@@ -155,10 +173,11 @@ class CosmosConversationClient():
         else:
             return False
     
-    async def update_message_feedback(self, user_id, message_id, feedback):
+    async def update_message_feedback(self, user_id, message_id, feedback,user_feedback):
         message = await self.container_client.read_item(item=message_id, partition_key=user_id)
         if message:
             message['feedback'] = feedback
+            message['user_feedback'] = user_feedback
             resp = await self.container_client.upsert_item(message)
             return resp
         else:

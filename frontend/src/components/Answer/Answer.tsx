@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text } from '@fluentui/react'
+import { DialogType, DialogFooter, PrimaryButton, TextField } from '@fluentui/react';
 import { useBoolean } from '@fluentui/react-hooks'
 import { ThumbDislike20Filled, ThumbLike20Filled } from '@fluentui/react-icons'
 import DOMPurify from 'dompurify'
@@ -12,11 +13,9 @@ import Plot from 'react-plotly.js'
 import { AskResponse, Citation, Feedback, historyMessageFeedback } from '../../api'
 import { XSSAllowTags } from '../../constants/xssAllowTags'
 import { AppStateContext } from '../../state/AppProvider'
-
 import { parseAnswer } from './AnswerParser'
 
 import styles from './Answer.module.css'
-
 interface Props {
   answer: AskResponse
   onCitationClicked: (citedDocument: Citation) => void
@@ -32,6 +31,10 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     return Feedback.Neutral
   }
 
+  const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
+  const [isUserFeedbackDialogOpen, setIsUserFeedbackDialogOpen] = useState(false);
+  const [userFeedbackMessage, setUserFeedbackMessage] = useState('');
+
   const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
   const filePathTruncationLimit = 50
 
@@ -44,7 +47,28 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const appStateContext = useContext(AppStateContext)
   const FEEDBACK_ENABLED =
     appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB
-  const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
+  const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer 
+
+  const handleFeedbackSubmit = async () => {
+    if (currentMessageId == null) return;
+    try {
+      // Update message feedback in db with user feedback message
+      const response = await historyMessageFeedback(currentMessageId, Feedback.Negative, userFeedbackMessage);
+      const data = await response.json()
+  
+      // Dispatch feedback state update
+      appStateContext?.dispatch({
+        type: 'SET_FEEDBACK_STATE',
+        payload: { answerId: currentMessageId, feedback: Feedback.Negative }
+      });
+  
+      // Close the dialogs
+      setIsFeedbackDialogOpen(false);
+      setIsUserFeedbackDialogOpen(false);
+    } catch (error) {
+      console.error('Error adding feedback to Cosmos DB', error);
+    }
+  };
 
   const handleChevronClick = () => {
     setChevronIsExpanded(!chevronIsExpanded)
@@ -113,6 +137,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     if (feedbackState === undefined || feedbackState === Feedback.Neutral || feedbackState === Feedback.Positive) {
       newFeedbackState = Feedback.Negative
       setFeedbackState(newFeedbackState)
+      setCurrentMessageId(answer.message_id)
       setIsFeedbackDialogOpen(true)
     } else {
       // Reset negative feedback to neutral
@@ -403,6 +428,44 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 
           {!showReportInappropriateFeedback ? <UnhelpfulFeedbackContent /> : <ReportInappropriateFeedbackContent />}
 
+          <Checkbox
+            label="User Defined Feedback"
+            onChange={(e, checked) => {
+              setIsUserFeedbackDialogOpen(checked || false);
+            }}
+
+            />
+
+            <Dialog
+              hidden={!isUserFeedbackDialogOpen}
+              onDismiss={() => setIsUserFeedbackDialogOpen(false)}
+              dialogContentProps={{
+                type: DialogType.normal,
+                title: 'User Defined Feedback',
+                subText: 'Please provide your feedback:',
+              }}
+              modalProps={{
+                isBlocking: false,
+                styles: { main: { maxWidth: 450 } },
+              }}
+            >
+              <TextField
+                label="Your Feedback"
+                multiline
+                rows={3}
+                value={userFeedbackMessage}
+                onChange={(e, newValue) => setUserFeedbackMessage(newValue || '')}
+              />
+              <DialogFooter>
+                <DefaultButton onClick={() => setIsUserFeedbackDialogOpen(false)} text="Cancel" />
+                <PrimaryButton onClick={() => {
+                  // Handle submit action here
+                  handleFeedbackSubmit();
+                  setIsUserFeedbackDialogOpen(false);
+                }} text="Submit" />
+              </DialogFooter>
+            </Dialog>
+            
           <div>By pressing submit, your feedback will be visible to the application owner.</div>
 
           <DefaultButton disabled={negativeFeedbackList.length < 1} onClick={onSubmitNegativeFeedback}>

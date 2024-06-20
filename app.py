@@ -497,7 +497,21 @@ async def update_conversation():
         logging.exception("Exception in /history/update")
         return jsonify({"error": str(e)}), 500
 
-
+# @bp.route("/add_user_feedback", methods=["POST"])
+# async def add_user_feedback():
+#     feedback_request = await request.get_json()
+#     cosmos_conversation_client = init_cosmosdb_client()
+#     success = await cosmos_conversation_client.add_user_feedback(
+#         feedback_request['message_id'], 
+#         feedback_request['user_id'], 
+#         feedback_request['user_feedback']
+#     )
+#     await cosmos_conversation_client.cosmosdb_client.close()
+#     if success:
+#         return jsonify({"status": "success"}), 200
+#     else:
+#         return jsonify({"error": "Failed to add user feedback"}), 500
+   
 @bp.route("/history/message_feedback", methods=["POST"])
 async def update_message():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
@@ -508,6 +522,7 @@ async def update_message():
     request_json = await request.get_json()
     message_id = request_json.get("message_id", None)
     message_feedback = request_json.get("message_feedback", None)
+    user_feedback=request_json.get("user_feedback", None)
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
@@ -517,7 +532,7 @@ async def update_message():
 
         ## update the message in cosmos
         updated_message = await cosmos_conversation_client.update_message_feedback(
-            user_id, message_id, message_feedback
+            user_id, message_id, message_feedback,user_feedback
         )
         if updated_message:
             return (
