@@ -519,20 +519,22 @@ async def update_message():
     cosmos_conversation_client = init_cosmosdb_client()
 
     ## check request for message_id
+   
     request_json = await request.get_json()
     message_id = request_json.get("message_id", None)
     message_feedback = request_json.get("message_feedback", None)
     user_feedback=request_json.get("user_feedback", None)
+
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
 
-        if not message_feedback:
-            return jsonify({"error": "message_feedback is required"}), 400
+        if not message_feedback and not user_feedback:
+            return jsonify({"error": "Either message_feedback or user_feedback is required"}), 400
 
         ## update the message in cosmos
         updated_message = await cosmos_conversation_client.update_message_feedback(
-            user_id, message_id, message_feedback,user_feedback
+        user_id, message_id,message_feedback,user_feedback
         )
         if updated_message:
             return (

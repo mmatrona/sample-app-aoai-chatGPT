@@ -43,7 +43,12 @@ export type Action =
       type: 'SET_FEEDBACK_STATE'
       payload: { answerId: string; feedback: Feedback.Positive | Feedback.Negative | Feedback.Neutral }
     }
+    
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
+  | {
+    type: 'SET_USER_FEEDBACK';
+    payload: { answerId: string; userFeedback: string };
+  };
 
 const initialState: AppState = {
   isChatHistoryOpen: false,

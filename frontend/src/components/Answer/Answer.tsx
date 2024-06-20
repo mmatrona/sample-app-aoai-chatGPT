@@ -10,7 +10,7 @@ import DOMPurify from 'dompurify'
 import remarkGfm from 'remark-gfm'
 import supersub from 'remark-supersub'
 import Plot from 'react-plotly.js'
-import { AskResponse, Citation, Feedback, historyMessageFeedback } from '../../api'
+import { AskResponse, Citation, Feedback, historyMessageFeedback, historyMessageUserFeedback} from '../../api'
 import { XSSAllowTags } from '../../constants/xssAllowTags'
 import { AppStateContext } from '../../state/AppProvider'
 import { parseAnswer } from './AnswerParser'
@@ -53,17 +53,17 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     if (currentMessageId == null) return;
     try {
       // Update message feedback in db with user feedback message
-      const response = await historyMessageFeedback(currentMessageId, Feedback.Negative, userFeedbackMessage);
+      
+      const response = await historyMessageUserFeedback(currentMessageId, userFeedbackMessage);
       const data = await response.json()
   
       // Dispatch feedback state update
       appStateContext?.dispatch({
-        type: 'SET_FEEDBACK_STATE',
-        payload: { answerId: currentMessageId, feedback: Feedback.Negative }
+        type: 'SET_USER_FEEDBACK',
+        payload: { answerId: currentMessageId, userFeedback: userFeedbackMessage }
       });
   
-      // Close the dialogs
-      setIsFeedbackDialogOpen(false);
+      // Close the dialog
       setIsUserFeedbackDialogOpen(false);
     } catch (error) {
       console.error('Error adding feedback to Cosmos DB', error);
@@ -396,7 +396,49 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             })}
           </div>
         )}
-      </Stack>
+        <div className="feedback-button-container">
+          <PrimaryButton
+            onClick={() => {
+              if (answer.message_id) {
+                setCurrentMessageId(answer.message_id);
+                setIsUserFeedbackDialogOpen(true);
+              }
+            }}
+          >
+            Provide Feedback
+          </PrimaryButton>
+          </div>
+
+          <Dialog
+            hidden={!isUserFeedbackDialogOpen}
+            onDismiss={() => setIsUserFeedbackDialogOpen(false)}
+            dialogContentProps={{
+              type: DialogType.normal,
+              title: 'User Defined Feedback',
+              subText: 'Please provide your feedback:',
+            }}
+            modalProps={{
+              isBlocking: false,
+              styles: { main: { maxWidth: 450 } },
+            }}
+          >
+            <TextField
+              label="Your Feedback"
+              multiline
+              rows={3}
+              value={userFeedbackMessage}
+              onChange={(e, newValue) => setUserFeedbackMessage(newValue || '')}
+            />
+            <DialogFooter>
+              <DefaultButton onClick={() => setIsUserFeedbackDialogOpen(false)} text="Cancel" />
+              <PrimaryButton onClick={() => {
+                // Handle submit action here
+                handleFeedbackSubmit();
+                setIsUserFeedbackDialogOpen(false);
+              }} text="Submit" />
+            </DialogFooter>
+          </Dialog>
+        </Stack> 
       <Dialog
         onDismiss={() => {
           resetFeedbackDialog()
@@ -427,44 +469,6 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
           <div>Your feedback will improve this experience.</div>
 
           {!showReportInappropriateFeedback ? <UnhelpfulFeedbackContent /> : <ReportInappropriateFeedbackContent />}
-
-          <Checkbox
-            label="User Defined Feedback"
-            onChange={(e, checked) => {
-              setIsUserFeedbackDialogOpen(checked || false);
-            }}
-
-            />
-
-            <Dialog
-              hidden={!isUserFeedbackDialogOpen}
-              onDismiss={() => setIsUserFeedbackDialogOpen(false)}
-              dialogContentProps={{
-                type: DialogType.normal,
-                title: 'User Defined Feedback',
-                subText: 'Please provide your feedback:',
-              }}
-              modalProps={{
-                isBlocking: false,
-                styles: { main: { maxWidth: 450 } },
-              }}
-            >
-              <TextField
-                label="Your Feedback"
-                multiline
-                rows={3}
-                value={userFeedbackMessage}
-                onChange={(e, newValue) => setUserFeedbackMessage(newValue || '')}
-              />
-              <DialogFooter>
-                <DefaultButton onClick={() => setIsUserFeedbackDialogOpen(false)} text="Cancel" />
-                <PrimaryButton onClick={() => {
-                  // Handle submit action here
-                  handleFeedbackSubmit();
-                  setIsUserFeedbackDialogOpen(false);
-                }} text="Submit" />
-              </DialogFooter>
-            </Dialog>
             
           <div>By pressing submit, your feedback will be visible to the application owner.</div>
 
