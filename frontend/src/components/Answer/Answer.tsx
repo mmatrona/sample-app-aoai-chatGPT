@@ -132,13 +132,13 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 
   const onDislikeResponseClicked = async () => {
     if (answer.message_id == undefined) return
+    setCurrentMessageId(answer.message_id)
 
     let newFeedbackState = feedbackState
     if (feedbackState === undefined || feedbackState === Feedback.Neutral || feedbackState === Feedback.Positive) {
       newFeedbackState = Feedback.Negative
       setFeedbackState(newFeedbackState)
-      setCurrentMessageId(answer.message_id)
-      setIsFeedbackDialogOpen(true)
+      await historyMessageFeedback(answer.message_id, newFeedbackState)
     } else {
       // Reset negative feedback to neutral
       newFeedbackState = Feedback.Neutral
@@ -407,7 +407,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
           >
             Provide Feedback
           </PrimaryButton>
-          </div>
+        </div>
 
           <Dialog
             hidden={!isUserFeedbackDialogOpen}
@@ -465,17 +465,6 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
           title: 'Submit Feedback',
           showCloseButton: true
         }}>
-        <Stack tokens={{ childrenGap: 4 }}>
-          <div>Your feedback will improve this experience.</div>
-
-          {!showReportInappropriateFeedback ? <UnhelpfulFeedbackContent /> : <ReportInappropriateFeedbackContent />}
-            
-          <div>By pressing submit, your feedback will be visible to the application owner.</div>
-
-          <DefaultButton disabled={negativeFeedbackList.length < 1} onClick={onSubmitNegativeFeedback}>
-            Submit
-          </DefaultButton>
-        </Stack>
       </Dialog>
     </>
   )
