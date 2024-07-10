@@ -60,6 +60,8 @@ async def favicon():
 
 @bp.route("/assets/<path:path>")
 async def assets(path):
+    if path.endswith(".js"):
+        return await send_from_directory("static/assets", path, mimetype="application/javascript")
     return await send_from_directory("static/assets", path)
 
 
