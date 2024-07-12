@@ -63,6 +63,7 @@ const Chat = () => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+  const [PreviousMessageId, setPreviousMessageId] = useState<string | null>(null);
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -135,6 +136,19 @@ const Chat = () => {
       assistantContent += resultMessage.content
       assistantMessage = resultMessage
       assistantMessage.content = assistantContent
+      
+      {/*console.log(PreviousMessageId)
+      console.log('---')
+      console.log(resultMessage.id)
+      console.log(appStateContext)
+      setPreviousMessageId(resultMessage.id)
+      console.log(PreviousMessageId)
+      appStateContext?.dispatch({
+        type: 'SET_PREVIOUS_MESSAGE_ID',
+        payload: resultMessage.id
+      });
+      console.log(appStateContext)
+      console.log('---')*/}
 
       if (resultMessage.context) {
         toolMessage = {
@@ -510,6 +524,19 @@ const Chat = () => {
     return abortController.abort()
   }
 
+  const handleSend = async (question: string, id?: string) => {
+    const response = appStateContext?.state.isCosmosDBAvailable?.cosmosDB
+      ? await makeApiRequestWithCosmosDB(question, id)
+      : await makeApiRequestWithoutCosmosDB(question, id);
+    //setPreviousMessageId(response.id); // Assuming response contains messageId
+  };
+
+  const handleFeedbackSend = async (feedback: string, id?: string) => {
+    const response = appStateContext?.state.isCosmosDBAvailable?.cosmosDB
+      ? await makeApiRequestWithCosmosDB(feedback, id)
+      : await makeApiRequestWithoutCosmosDB(feedback, id);
+  };
+
   const clearChat = async () => {
     setClearingChat(true)
     if (appStateContext?.state.currentChat?.id && appStateContext?.state.isCosmosDBAvailable.cosmosDB) {
@@ -866,7 +893,7 @@ const Chat = () => {
                     aria-label="start a new chat button"
                   />
                 )}
-                <CommandBarButton
+                {/*<CommandBarButton
                   role="button"
                   styles={{
                     icon: {
@@ -884,6 +911,7 @@ const Chat = () => {
                       background: '#F0F0F0'
                     }
                   }}
+                  }
                   className={
                     appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
                       ? styles.clearChatBroom
@@ -897,7 +925,7 @@ const Chat = () => {
                   }
                   disabled={disabledButton()}
                   aria-label="clear chat button"
-                />
+                />*/}
                 <Dialog
                   hidden={hideErrorDialog}
                   onDismiss={handleErrorDialogClose}
@@ -906,6 +934,7 @@ const Chat = () => {
               </Stack>
               <QuestionInput
                 clearOnSend
+                onFeedbackSend={handleFeedbackSend}
                 placeholder="Type a new question..."
                 disabled={isLoading}
                 onSend={(question, id) => {

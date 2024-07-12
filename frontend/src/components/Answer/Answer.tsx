@@ -34,10 +34,8 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
   const [isUserFeedbackDialogOpen, setIsUserFeedbackDialogOpen] = useState(false);
   const [userFeedbackMessage, setUserFeedbackMessage] = useState('');
-
   const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
   const filePathTruncationLimit = 50
-
   const parsedAnswer = useMemo(() => parseAnswer(answer), [answer])
   const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen)
   const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer))
@@ -48,7 +46,17 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const FEEDBACK_ENABLED =
     appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB
   const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer 
+  const SET_PREVIOUS_MESSAGE_ID = appStateContext?.state.frontendSettings?.sanitize_answer 
 
+  const updatePrevMessageState = async () => {
+    appStateContext?.dispatch({
+      type: 'SET_PREVIOUS_MESSAGE_ID',
+      payload: 'message state updated'
+    });
+
+
+  }
+  
   const handleFeedbackSubmit = async () => {
     if (currentMessageId == null) return;
     try {
@@ -137,14 +145,15 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     let newFeedbackState = feedbackState
     if (feedbackState === undefined || feedbackState === Feedback.Neutral || feedbackState === Feedback.Positive) {
       newFeedbackState = Feedback.Negative
-      setFeedbackState(newFeedbackState)
-      await historyMessageFeedback(answer.message_id, newFeedbackState)
     } else {
       // Reset negative feedback to neutral
       newFeedbackState = Feedback.Neutral
-      setFeedbackState(newFeedbackState)
-      await historyMessageFeedback(answer.message_id, Feedback.Neutral)
+      
     }
+
+    setFeedbackState(newFeedbackState)
+    await historyMessageFeedback(answer.message_id, newFeedbackState)
+
     appStateContext?.dispatch({
       type: 'SET_FEEDBACK_STATE',
       payload: { answerId: answer.message_id, feedback: newFeedbackState }
@@ -396,7 +405,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             })}
           </div>
         )}
-        <div className="feedback-button-container">
+        {/*<div className="feedback-button-container">
           <PrimaryButton
             onClick={() => {
               if (answer.message_id) {
@@ -407,7 +416,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
           >
             Provide Feedback
           </PrimaryButton>
-        </div>
+        </div>*/}
 
           <Dialog
             hidden={!isUserFeedbackDialogOpen}

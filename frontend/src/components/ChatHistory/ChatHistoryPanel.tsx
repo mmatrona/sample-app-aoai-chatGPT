@@ -67,7 +67,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
   }
 
   const menuItems: IContextualMenuItem[] = [
-    { key: 'clearAll', text: 'Clear all chat history', iconProps: { iconName: 'Delete' } }
+    { key: 'clearAll', text: 'Clear all chat history?', iconProps: { iconName: 'Delete' } }
   ]
 
   const handleHistoryClick = () => {
@@ -121,7 +121,7 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
         </StackItem>
         <Stack verticalAlign="start">
           <Stack horizontal styles={commandBarButtonStyle}>
-            <CommandBarButton
+            {/*<CommandBarButton
               iconProps={{ iconName: 'More' }}
               title={'Clear all chat history'}
               onClick={onShowContextualMenu}
@@ -130,13 +130,13 @@ export function ChatHistoryPanel(_props: ChatHistoryPanelProps) {
               role="button"
               id="moreButton"
             />
-            <ContextualMenu
+            {/* <ContextualMenu
               items={menuItems}
               hidden={!showContextualMenu}
               target={'#moreButton'}
               onItemClick={toggleClearAllDialog}
-              onDismiss={onHideContextualMenu}
-            />
+             onDismiss={onHideContextualMenu}
+            />*/}
             <CommandBarButton
               iconProps={{ iconName: 'Cancel' }}
               title={'Hide'}

@@ -24,6 +24,7 @@ export interface AppState {
   currentChat: Conversation | null
   frontendSettings: FrontendSettings | null
   feedbackState: { [answerId: string]: Feedback.Neutral | Feedback.Positive | Feedback.Negative }
+  previousMessageId?: string;
 }
 
 export type Action =
@@ -45,10 +46,8 @@ export type Action =
     }
     
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
-  | {
-    type: 'SET_USER_FEEDBACK';
-    payload: { answerId: string; userFeedback: string };
-  };
+  | { type: 'SET_USER_FEEDBACK'; payload: { answerId: string; userFeedback: string };}
+  | { type: 'SET_PREVIOUS_MESSAGE_ID'; payload: string };;
 
 const initialState: AppState = {
   isChatHistoryOpen: false,
@@ -61,7 +60,8 @@ const initialState: AppState = {
     status: CosmosDBStatus.NotConfigured
   },
   frontendSettings: null,
-  feedbackState: {}
+  feedbackState: {},
+  previousMessageId: undefined
 }
 
 export const AppStateContext = createContext<

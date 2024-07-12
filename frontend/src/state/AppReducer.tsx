@@ -74,6 +74,11 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
           [action.payload.answerId]: action.payload.feedback
         }
       }
+    case 'SET_PREVIOUS_MESSAGE_ID':
+      return {
+        ...state,
+        previousMessageId: action.payload,
+      };
     default:
       return state
   }

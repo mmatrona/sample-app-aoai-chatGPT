@@ -27,6 +27,35 @@
   bottom: 20px;
 }
 
+.correctionButton {
+  background-color: #d83b01; /* Error color */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.correctionButton:hover {
+  background-color: #a32c01; /* Darker shade on hover */
+}
+
+.correctionButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #d83b01; /* Focus outline */
+}
+
+.correctionButtonDisabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .questionInputSendButton {
   width: 24px;
   height: 23px;
