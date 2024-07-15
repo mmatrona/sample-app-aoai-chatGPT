@@ -759,6 +759,8 @@ const Chat = () => {
     )
   }
 
+  const formattedDescription = (ui?.chat_description ?? 'No description available.')
+
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
@@ -796,7 +798,10 @@ const Chat = () => {
                 <img src="/aiwelder.png" alt="Corroded Metal Artifact" className={styles.styledImage} />
                 <img src={ui?.chat_logo ? ui.chat_logo : Contoso} className={styles.chatIcon} aria-hidden="true" />
                 <h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
-                <h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
+                <h2
+                  className={styles.chatEmptyStateSubtitle}
+                  dangerouslySetInnerHTML={{ __html: formattedDescription }}
+                ></h2>
               </Stack>
             ) : (
               <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? '40px' : '0px' }} role="log">

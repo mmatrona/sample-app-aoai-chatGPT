@@ -110,13 +110,13 @@ class _AzureOpenAISettings(BaseSettings):
     stream: bool = True
     stop_sequence: Optional[List[str]] = None
     seed: Optional[int] = None
-    choices_count: Optional[conint(ge=1, le=128)] = Field(default=1, serialization_alias="n")
+    choices_count: Optional[conint(ge=1, le=128)] = Field(default=1, serialization_alias="n") # type: ignore
     user: Optional[str] = None
-    tools: Optional[conlist(_AzureOpenAITool, min_length=1)] = None
+    tools: Optional[conlist(_AzureOpenAITool, min_length=1)] = None # type: ignore
     tool_choice: Optional[str] = None
     logit_bias: Optional[dict] = None
-    presence_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
-    frequency_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
+    presence_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0 # type: ignore
+    frequency_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0 # type: ignore
     system_message: str = "You are an AI assistant that helps people find information."
     preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION
     embedding_endpoint: Optional[str] = None
