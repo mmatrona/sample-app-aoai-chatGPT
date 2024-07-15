@@ -52,18 +52,19 @@ async def index():
         favicon=app_settings.ui.favicon
     )
 
-
 @bp.route("/favicon.ico")
 async def favicon():
     return await bp.send_static_file("favicon.ico")
 
+@bp.route("/aiwelder.png")
+async def aiwelder():
+    return await bp.send_static_file("aiwelder.png")
 
 @bp.route("/assets/<path:path>")
 async def assets(path):
     if path.endswith(".js"):
         return await send_from_directory("static/assets", path, mimetype="application/javascript")
     return await send_from_directory("static/assets", path)
-
 
 # Debug settings
 DEBUG = os.environ.get("DEBUG", "false")

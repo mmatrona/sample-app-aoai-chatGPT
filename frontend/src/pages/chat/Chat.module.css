@@ -37,6 +37,15 @@
   align-items: center;
 }
 
+.styledImage {
+  max-width: 35%; 
+  max-height: 35%;
+  margin-bottom: 20px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 .chatEmptyStateTitle {
   font-style: normal;
   font-weight: 700;
@@ -385,4 +394,5 @@ a {
   .citationPanel {
     max-width: 100%;
   }
+
 }

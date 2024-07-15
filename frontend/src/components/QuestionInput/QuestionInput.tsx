@@ -81,8 +81,7 @@ export const QuestionInput = ({ onSend, onFeedbackSend, disabled, placeholder, c
         onKeyDown={onEnterPress}
       />
       <Stack verticalAlign="start" styles={{ root: { display: 'flex', flexDirection: 'column' } }}>
-        {/* New Feedback Button */}
-        {/*<div
+        {/* <div
           className={styles.correctionButton}
           role="button"
           tabIndex={0}
@@ -95,7 +94,7 @@ export const QuestionInput = ({ onSend, onFeedbackSend, disabled, placeholder, c
           ) : (
             <span>Provide Feedback</span>
           )}
-        </div>*/}
+        </div> */}
         <div
           className={styles.questionInputSendButtonContainer}
           role="button"
